@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Mania</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #1a1a1a;
+      color: #fff;
+    }
+
+    header {
+      background-color: #333;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+
+    #search {
+      padding: 10px;
+      width: 300px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    header button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: green;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    header button:hover {
+      background-color: #ff3c3c;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .categories {
+      margin-bottom: 20px;
+    }
+
+    .category-list {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .category-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #444;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .category-btn.active {
+      background-color: green;
+    }
+
+    .category-btn:hover {
+      background-color: red;
+    }
+
+    .movies .movie-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .movie-card {
+      background-color: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .movie-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .movie-card video {
+      width: 100%;
+      height: auto;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .movie-card h3 {
+      margin: 10px 0;
+      font-size: 1.2rem;
+    }
+
+    .movie-card p {
+      margin: 5px 0;
+      color: #aaa;
+    }
+
+    .movie-card .favorite-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: green;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .movie-card .favorite-btn:hover {
+      background-color: #e50914;
+    }
+
+    .movie-card .favorite-btn.active {
+      background-color: black;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    .modal .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .favorites-list, .download-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .favorite-item, .download-item {
+      background-color: #444;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .favorite-item:hover, .download-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .favorite-item h3, .download-item h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .favorite-item p, .download-item p {
+      margin: 5px 0;
+      color: #aaa;
+    }
+
+    .favorite-item .delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: #e50914;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .favorite-item .delete-btn:hover {
+      background-color: #ff3c3c;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Movie Mania</h1>
+    <input type="text" id="search" placeholder="Search movies...">
+    <button id="view-favorites">View Favorites</button>
+    <button id="download-code">Download Code</button>
+  </header>
+
+  <main>
+    <section class="categories">
+      <h2>Categories</h2>
+      <div class="category-list">
+        <button class="category-btn active" data-category="all">All</button>
+        <button class="category-btn" data-category="Action">Action</button>
+        <button class="category-btn" data-category="Kides">Kides</button>
+        <button class="category-btn" data-category="horror">horror</button>
+      </div>
+    </section>
+
+    <section class="movies">
+      <h2>Popular Movies</h2>
+      <div class="movie-list" id="movie-list">
+        <!-- Movies will be dynamically added here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Favorites Modal -->
+  <div id="favorites-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Your Favorites</h2>
+      <div class="favorites-list" id="favorites-list">
+        <!-- Favorite movies will be added here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Download Modal -->
+  <div id="download-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-download">&times;</span>
+      <h2>Download Your Favorite Video</h2>
+      <div class="download-list" id="download-list">
+        <!-- Downloadable movies will be added here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample movie data
+    const movies = [
+      {
+        title: "Venom 2018",
+        category: "Action",
+        video: "Video/Venom.2018.720p.BRRip.HEVC.MkvCage.www.P30Day.com.mkv",
+      },
+      {
+        title: "Venom 2",
+        category: "Action",
+        video: "Video/Venom_Let_There_Be_Carnage.mp4",
+      },
+      {
+        title: "Ratatouille",
+        category: "Kides",
+        video: "Video/Ratatouille.mp4",
+      },
+      {
+        title: "Car 1",
+        category: "Kides",
+        video: "Video/CAR.mp4",
+      },
+    ];
+
+    // DOM Elements
+    const movieList = document.getElementById("movie-list");
+    const searchInput = document.getElementById("search");
+    const categoryButtons = document.querySelectorAll(".category-btn");
+    const viewFavoritesBtn = document.getElementById("view-favorites");
+    const favoritesModal = document.getElementById("favorites-modal");
+    const favoritesList = document.getElementById("favorites-list");
+    const closeModal = document.querySelector(".close");
+    const downloadCodeBtn = document.getElementById("download-code");
+    const downloadModal = document.getElementById("download-modal");
+    const downloadList = document.getElementById("download-list");
+    const closeDownloadModal = document.querySelector(".close-download");
+
+    let favorites = [];
+
+    // Display all movies initially
+    displayMovies(movies);
+
+    // Filter movies by category
+    categoryButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const category = button.dataset.category;
+        const filteredMovies = category === "all" ? movies : movies.filter((movie) => movie.category === category);
+        displayMovies(filteredMovies);
+
+        // Update active button
+        categoryButtons.forEach((btn) => btn.classList.remove("active"));
+        button.classList.add("active");
+      });
+    });
+
+    // Search functionality
+    searchInput.addEventListener("input", (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const filteredMovies = movies.filter((movie) => movie.title.toLowerCase().includes(searchTerm));
+      displayMovies(filteredMovies);
+    });
+
+    // Add to favorites
+    function addToFavorites(movie) {
+      if (!favorites.includes(movie)) {
+        favorites.push(movie);
+        displayFavorites();
+      }
+    }
+
+    // Remove from favorites
+    function removeFromFavorites(movie) {
+      favorites = favorites.filter((fav) => fav.title !== movie.title);
+      displayFavorites();
+    }
+
+    // Display favorites
+    function displayFavorites() {
+      favoritesList.innerHTML = favorites
+        .map(
+          (movie) => `
+          <div class="favorite-item">
+            <button class="delete-btn" onclick="removeFromFavoritesByTitle('${movie.title}')">×</button>
+            <h3>${movie.title}</h3>
+            <p>${movie.category}</p>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    // Remove from favorites by title
+    function removeFromFavoritesByTitle(title) {
+      const movie = movies.find((m) => m.title === title);
+      removeFromFavorites(movie);
+    }
+
+    // Open favorites modal
+    viewFavoritesBtn.addEventListener("click", () => {
+      favoritesModal.style.display = "flex";
+    });
+
+    // Close favorites modal
+    closeModal.addEventListener("click", () => {
+      favoritesModal.style.display = "none";
+    });
+
+    // Open download modal
+    downloadCodeBtn.addEventListener("click", () => {
+      downloadModal.style.display = "flex";
+      displayDownloadList();
+    });
+
+    // Close download modal
+    closeDownloadModal.addEventListener("click", () => {
+      downloadModal.style.display = "none";
+    });
+
+    // Display download list
+    function displayDownloadList() {
+      downloadList.innerHTML = favorites
+        .map(
+          (movie) => `
+          <div class="download-item" data-video="${movie.video}">
+            <h3>${movie.title}</h3>
+            <p>Click to download</p>
+          </div>
+        `
+        )
+        .join("");
+
+      // Add click event to download items
+      const downloadItems = document.querySelectorAll(".download-item");
+      downloadItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          const videoUrl = item.dataset.video;
+          downloadVideo(videoUrl);
+        });
+      });
+    }
+
+    // Download video
+    function downloadVideo(videoUrl) {
+      const a = document.createElement("a");
+      a.href = videoUrl;
+      a.download = videoUrl.split("/").pop();
+      a.click();
+    }
+
+    // Function to display movies
+    function displayMovies(movies) {
+      movieList.innerHTML = movies
+        .map(
+          (movie) => `
+          <div class="movie-card">
+            <video controls>
+              <source src="${movie.video}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <h3>${movie.title}</h3>
+            <p>${movie.category}</p>
+            <button class="favorite-btn" onclick="toggleFavorite(this, '${movie.title}')">❤️</button>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    // Toggle favorite
+    function toggleFavorite(button, title) {
+      const movie = movies.find((m) => m.title === title);
+      if (button.classList.contains("active")) {
+        button.classList.remove("active");
+        removeFromFavorites(movie);
+      } else {
+        button.classList.add("active");
+        addToFavorites(movie);
+      }
+    }
+  </script>
+</body>
+</html>
